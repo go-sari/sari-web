@@ -26,7 +26,7 @@ SARI_PARAM_PRIMARY_AWS_REGION = "PRIMARY_AWS_REGION"
 app = Flask(__name__)
 app.config['sso_url'] = os.environ['SSO_URL']
 Bootstrap(app)
-app.secret_key = str(uuid.uuid4())
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", str(uuid.uuid4()))
 logging.basicConfig(level=logging.DEBUG)
 
 
