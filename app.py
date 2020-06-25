@@ -41,8 +41,18 @@ def idp_initiated(idp_name):
     session["login"] = user_info.text
 
     aws_roles = saml_enum_aws_roles(authn_response)
-    # TODO: support multiple roles. Redirect to page allowing user to pick which Role he/she wants to use
-    role_arn, principal_arn = aws_roles[0]
+
+    if not aws_roles:
+        raise ValueError("Invalid assertion: no roles defined")
+    if len(aws_roles) == 1:
+        account_id = next(iter(aws_roles))
+    elif 'account_id' in request.form:
+        account_id = request.form['account_id']
+    else:
+        accounts = saml_enum_account_aliases(authn_response)
+        return render_template('select_account.html', accounts=accounts, saml_assertion=saml_assertion)
+
+    role_arn, principal_arn = aws_roles[account_id]
 
     client = boto3.client(
         'sts',
@@ -202,6 +212,11 @@ def filter_allowed_instances(contents, default_region, login, pulumi_stack_name)
     return databases
 
 
+def get_aws_account_from_arn(arn):
+    _, _, _, _, account, *_ = arn.split(":")
+    return account
+
+
 def get_boto3_session(aws_credentials: Optional[Dict[str, str]] = None,
                       region_name: str = None) -> boto3.session.Session:
     if not aws_credentials:
@@ -232,10 +247,36 @@ def s3_read_text(boto3_session: boto3.session.Session, bucket: str, key: str) ->
     return obj.get()["Body"].read()
 
 
-def saml_enum_aws_roles(auth_response: AuthnResponse) -> List[Tuple[str, str]]:
+def saml_enum_aws_roles(auth_response: AuthnResponse) -> Dict[str, Tuple[str, str]]:
+    """
+    Return the Role/Principal pairs defined as an attribute of the SAML assertion.
+
+    :return: a dictionary that maps an AWS account to a pair RoleARN/PrincipalARN.
+    """
+
+    def group_by_account(role_arn, provider_arn) -> Tuple[str, Tuple[str, str]]:
+        acc1 = get_aws_account_from_arn(role_arn)
+        acc2 = get_aws_account_from_arn(provider_arn)
+        if acc1 != acc2:
+            raise ValueError(f"Account mismatch: ${acc1} != ${acc2}")
+        return acc1, (role_arn, provider_arn)
+
     # See
     # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_saml_assertions.html#saml_role-attribute
-    return [pair.split(",") for pair in auth_response.get_identity()["https://aws.amazon.com/SAML/Attributes/Role"]]
+    return dict([group_by_account(*pair.split(","))
+                 for pair in auth_response.get_identity()["https://aws.amazon.com/SAML/Attributes/Role"]])
+
+
+def saml_enum_account_aliases(auth_response: AuthnResponse) -> Dict[str, str]:
+    """
+    Return the mapping between AWS Account IDs and their aliases.
+    """
+
+    def account_alias_pair(alias: str, account_id: str) -> Tuple[str, str]:
+        return account_id, alias
+
+    return dict([account_alias_pair(*pair.split(","))
+                 for pair in auth_response.get_identity()["https://github.com/eliezio/sari/AccountAlias"]])
 
 
 def force_attribute_value(cls, attr_name, value):

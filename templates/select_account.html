@@ -1,0 +1,31 @@
+{% extends "bootstrap/base.html" %}
+
+{% block styles %}
+    {{ super() }}
+    <style media="screen" type="text/css">
+        .custom-control-label::before {
+            background-color: #ffe693;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1 class="mb-5">SARI Web</h1>
+            <p class="lead">Select the AWS Account:</p>
+            <form target="/saml/idp/sari" method="post">
+                {% for account_id, alias in accounts.items() %}
+                    <div class="custom-control custom-radio mt-3">
+                        <input class="form-control custom-control-input" type="radio" name="account_id"
+                               id="account{{ loop.index0 }}" value="{{ account_id }}" {{ "checked" if loop.index0 == 0 else "" }}>
+                        <label class="custom-control-label" for="account{{ loop.index0 }}">{{ alias }} ({{ account_id }})</label>
+                    </div>
+                {% endfor %}
+                <input type="text" name="SAMLResponse" class="form-control" value="{{ saml_assertion }}" hidden>
+                <button id="submit" type="submit" class="btn btn-primary mt-5" formtarget="_self">Continue</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
