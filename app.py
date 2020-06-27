@@ -19,6 +19,8 @@ from saml2.response import AuthnResponse, StatusResponse
 DEFAULT_AWS_REGION = "us-east-1"
 
 # SARI Configuration parameters
+SARI_PARAM_BH_HOSTNAME = "BH_HOSTNAME"
+SARI_PARAM_BH_USERNAME = "BH_USERNAME"
 SARI_PARAM_PULUMI_BACKEND_URL = "PULUMI_BACKEND_URL"
 SARI_PARAM_PULUMI_STACK_NAME = "PULUMI_STACK_NAME"
 SARI_PARAM_PRIMARY_AWS_REGION = "PRIMARY_AWS_REGION"
@@ -107,8 +109,11 @@ def get_db_configuration(region, db_identifier):
     # Generate the ephemeral password
     login = session["login"]
     token = rds.generate_db_auth_token(DBHostname=db.Endpoint.Address, Port=db.Endpoint.Port, DBUsername=login)
+    config = session["sari_config"]
     return {
         # The key names MUST match the IDs of the form INPUT tag
+        "bh_hostname": config[SARI_PARAM_BH_HOSTNAME],
+        "bh_username": config[SARI_PARAM_BH_USERNAME],
         "rds_hostname": db.Endpoint.Address,
         "rds_port": db.Endpoint.Port,
         "rds_username": login,
