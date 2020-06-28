@@ -36,6 +36,7 @@ logging.basicConfig(level=logging.DEBUG)
 def idp_initiated(idp_name):
     saml_client = saml_client_for(idp_name)
     saml_assertion = request.form['SAMLResponse']
+    hack_disable_response_verify()
     authn_response = saml_client.parse_authn_request_response(
         saml_assertion,
         entity.BINDING_HTTP_POST)
@@ -286,18 +287,23 @@ def saml_enum_account_aliases(auth_response: AuthnResponse) -> Dict[str, str]:
                 for pair in auth_response.get_identity()["https://github.com/eliezio/sari/AccountAlias"])
 
 
-def force_attribute_value(cls, attr_name, value):
+_patched = False
+
+
+def hack_disable_response_verify():
     def new_getattribute(this, name):
-        if name == attr_name:
-            return value
+        if name == 'do_not_verify':
+            return True
         else:
             return object.__getattribute__(this, name)
 
-    cls.__getattribute__ = new_getattribute
+    global _patched
+    if not _patched:
+        StatusResponse.__getattribute__ = new_getattribute
+        _patched = True
 
 
 if __name__ == "__main__":
-    force_attribute_value(StatusResponse, "do_not_verify", True)
     port = int(os.environ.get('PORT', 8080))
     if port == 8080:
         app.debug = True
