@@ -161,6 +161,9 @@ def saml_client_for(idp_name=None):
                 'want_response_signed': False,
             },
         },
+        # Although SAML response verification is disabled, pysaml2 still looks up for xmlsec1 binary.
+        # See discussion at https://github.com/Miserlou/Zappa/issues/1374
+        "xmlsec_binary": "/bin/echo",
     }
     config = Saml2Config()
     config.load(settings)
