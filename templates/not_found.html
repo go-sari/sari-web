@@ -5,7 +5,7 @@
         <div class="container">
             <h1 class="display-5">Oops!</h1>
             <h2>404 Not Found</h2>
-            <img class="w-25 mt-4 mb-4" src="/static/assets/sad.png" alt="sad emoji">
+            <img class="w-25 mt-4 mb-4" src="{{ url_for('static', filename='assets/sad.png') }}" alt="sad emoji">
             <p class="lead">Sorry, an error has occurred, Requested page not found!</p>
             <div class="error-actions">
                 <a href="{{ config['sso_url'] }}" class="btn btn-primary btn-lg">

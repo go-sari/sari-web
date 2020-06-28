@@ -49,7 +49,8 @@
                         <div class="input-group mb-3">
                             <input type="text" class="form-control d-inline-block text-truncate" id="{{ id_ }}" readonly>
                             <button type="button" class="btn" data-clipboard-target="#{{ id_ }}">
-                                <img src="/static/assets/clippy.svg" width="13" alt="Copy to clipboard">
+                                <img src="{{ url_for('static', filename='assets/clippy.svg') }}" width="13"
+                                     alt="Copy to clipboard">
                             </button>
                         </div>
                     </div>
@@ -71,7 +72,7 @@
         })
 
         $(document).ready(function () {
-            $.getJSON("/v1/databases", function (databases_) {
+            $.getJSON("{{ url_for('list_databases') }}", function (databases_) {
                 databases = databases_;
                 fill_select_picker("#region", Object.keys(databases));
                 fill_select_picker("#db_id", databases[$("#region").val()]);
@@ -87,7 +88,8 @@
         $("#get_config").click(function () {
             let region = $("#region").val();
             let db_id = $("#db_id").val();
-            $.getJSON(`/v1/db_config/${region}/${db_id}`, function (config) {
+            let tmpl_url = "{{ url_for('get_db_configuration', region='REGION', db_identifier='DB_ID') }}";
+            $.getJSON(tmpl_url.replace('REGION', region).replace('DB_ID', db_id), function (config) {
                 for (const [key, value] of Object.entries(config)) {
                     let element = $(`#${key}`)
                     element.val(value);

@@ -26,6 +26,7 @@ SARI_PARAM_PULUMI_STACK_NAME = "PULUMI_STACK_NAME"
 SARI_PARAM_PRIMARY_AWS_REGION = "PRIMARY_AWS_REGION"
 
 app = Flask(__name__)
+app.config['APPLICATION_ROOT'] = os.environ.get('FLASK_APPLICATION_ROOT', '/')
 app.config['sso_url'] = os.environ['SSO_URL']
 Bootstrap(app)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", str(uuid.uuid4()))
@@ -89,7 +90,7 @@ def error_not_found(error):
     return render_template('not_found.html')
 
 
-@app.route("/v1/databases")
+@app.route("/api/databases")
 def list_databases():
     """
     List all RDS instances enabled for the current user, grouped by region.
@@ -97,7 +98,7 @@ def list_databases():
     return load_db_instances()
 
 
-@app.route("/v1/db_config/<region>/<db_identifier>")
+@app.route("/api/db_config/<region>/<db_identifier>")
 def get_db_configuration(region, db_identifier):
     """
     Generates all parameters required to access a given RDS instance.

@@ -14,7 +14,7 @@
         <div class="container">
             <h1 class="mb-5">SARI Web</h1>
             <p class="lead">Select the AWS Account:</p>
-            <form target="/saml/idp/sari" method="post">
+            <form method="post">
                 {% for account_id, alias in accounts.items() %}
                     <div class="custom-control custom-radio mt-3">
                         <input class="form-control custom-control-input" type="radio" name="account_id"
