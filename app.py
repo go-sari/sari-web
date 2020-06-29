@@ -7,7 +7,7 @@ import uuid
 from typing import Dict, List, Optional, Tuple
 
 import boto3
-from flask import Flask, render_template, request, session, url_for, send_from_directory
+from flask import Flask, render_template, request, session, url_for
 from flask_bootstrap import Bootstrap
 from prodict import Prodict
 from saml2 import BINDING_HTTP_POST, BINDING_HTTP_REDIRECT, entity
@@ -76,12 +76,6 @@ def idp_initiated(idp_name):
     session["sari_config"] = get_sari_config(aws_credentials)
 
     return render_template('db_config.html', session=session)
-
-
-@app.route("/favicon.ico")
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static/assets'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 
 # noinspection PyUnusedLocal
