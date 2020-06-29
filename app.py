@@ -282,12 +282,8 @@ def saml_enum_account_aliases(auth_response: AuthnResponse) -> Dict[str, str]:
     """
     Return the mapping between AWS Account IDs and their aliases.
     """
-
-    def account_alias_pair(alias: str, account_id: str) -> Tuple[str, str]:
-        return account_id, alias
-
-    return dict([account_alias_pair(*pair.split(","))
-                 for pair in auth_response.get_identity()["https://github.com/eliezio/sari/AccountAlias"]])
+    return dict(pair.split(",")
+                for pair in auth_response.get_identity()["https://github.com/eliezio/sari/AccountAlias"])
 
 
 def force_attribute_value(cls, attr_name, value):
