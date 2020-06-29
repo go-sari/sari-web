@@ -215,8 +215,7 @@ def filter_allowed_instances(contents, default_region, login, pulumi_stack_name)
                              f"(?:(?P<region>[a-z0-9-]+)/)?(?P<db_id>[a-z0-9-]+)/{login}")
     for res in json.loads(contents)["checkpoint"]["latest"]["resources"]:
         urn = res["urn"]
-        match = urn_pattern.match(urn)
-        if match:
+        if match := urn_pattern.match(urn):
             region = match.group("region") or default_region
             db_id = match.group("db_id")
             databases.setdefault(region, []).append(db_id)
@@ -224,8 +223,9 @@ def filter_allowed_instances(contents, default_region, login, pulumi_stack_name)
 
 
 def get_aws_account_from_arn(arn):
-    _, _, _, _, account, *_ = arn.split(":")
-    return account
+    # Reference:
+    # https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html#arns-syntax
+    return arn.split(":")[4]
 
 
 def get_boto3_session(aws_credentials: Optional[Dict[str, str]] = None,
