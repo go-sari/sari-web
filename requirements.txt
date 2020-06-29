@@ -4,4 +4,3 @@ Flask-Bootstrap4
 Jinja2
 prodict
 pysaml2
-requests
