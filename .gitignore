@@ -1,2 +1,8 @@
 .idea/
 .venv/
+.envrc*
+
+.terraform/
+terraform.tfstate*
+
+sari-web-template-*.json
