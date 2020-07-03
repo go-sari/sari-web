@@ -27,6 +27,12 @@
                                 data-width="auto">
                         </select>
                     </div>
+                    <div class="col-md d-flex flex-column col-form-label-sm align-items-start">
+                        <label for="sel_db_name">Database:</label>
+                        <select id="sel_db_name" class="form-control" data-live-search="true" data-size="10"
+                                data-width="auto">
+                        </select>
+                    </div>
                     <div class="col-md col-form-label-sm">
                         <button id="get_config" type="button" class="btn btn-outline-success form-control">Get
                             Configuration
@@ -93,23 +99,29 @@
                         "on this AWS account.");
                 } else {
                     ready_for_success();
-                    fill_select_picker("#region", Object.keys(databases));
-                    fill_select_picker("#db_id", databases[$("#region").val()]);
+                    fill_select_picker("#region", Object.keys(databases).sort());
                 }
             })
         })
 
         $("#region").change(function () {
-            if (databases != null) {
-                fill_select_picker("#db_id", databases[$("#region").val()]);
-            }
+            fill_select_picker("#db_id", Object.keys(databases[$("#region").val()]).sort());
+        })
+
+        $("#db_id").change(function () {
+            fill_select_picker("#sel_db_name", databases[$("#region").val()][$("#db_id").val()].sort());
         })
 
         $("#get_config").click(function () {
             let region = $("#region").val();
             let db_id = $("#db_id").val();
-            let tmpl_url = "{{ url_for('get_db_configuration', region='REGION', db_identifier='DB_ID') }}";
-            $.getJSON(tmpl_url.replace('REGION', region).replace('DB_ID', db_id), function (config) {
+            let db_name = $("#sel_db_name").val();
+            {# It's not possible to prevent the HTML escaping inside the url_for() function. #}
+            {# The workaround is to use replace() to unescape the delimiters. #}
+            let url = `{{ url_for('get_db_configuration', region="${region}", db_identifier='${db_id}', db_name='${db_name}')
+                          | replace("%24%7B", "${")
+                          | replace("%7D", "}")}}`;
+            $.getJSON(url, function (config) {
                 for (const [key, value] of Object.entries(config)) {
                     let element = $(`#${key}`)
                     element.val(value);
@@ -124,6 +136,7 @@
                 select.append(new Option(key, key))
             });
             select.selectpicker('refresh');
+            select.change();
         }
 
         function ready_for_success() {

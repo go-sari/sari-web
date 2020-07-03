@@ -92,8 +92,8 @@ def list_databases():
     return load_db_instances()
 
 
-@app.route("/api/db_config/<region>/<db_identifier>")
-def get_db_configuration(region, db_identifier):
+@app.route("/api/db_config/<region>/<db_identifier>/<db_name>")
+def get_db_configuration(region, db_identifier, db_name):
     """
     Generates all parameters required to access a given RDS instance.
     """
@@ -113,7 +113,7 @@ def get_db_configuration(region, db_identifier):
         "rds_port": db.Endpoint.Port,
         "rds_username": login,
         "rds_password": token,
-        "db_name": db.DBName,
+        "db_name": db_name,
     }
 
 
@@ -210,14 +210,19 @@ def filter_allowed_instances(contents, default_region, login, pulumi_stack_name)
     identifiers.
     """
     databases = {}
-    urn_pattern = re.compile(f"urn:pulumi:{pulumi_stack_name}::sari::mysql:index/user:User::"
-                             f"(?:(?P<region>[a-z0-9-]+)/)?(?P<db_id>[a-z0-9-]+)/{login}")
+    # urn:pulumi:<STACK_NAME>::sari::mysql:index/grant:Grant::(<REGION>/)?<DB_ID>/(.<DB_NAME>)?/<LOGIN>
+    grant_pattern = re.compile(f"urn:pulumi:{pulumi_stack_name}::sari::mysql:index/grant:Grant::"
+                               "(?:(?P<region>[a-z0-9-]+)/)?"
+                               "(?P<db_id>[a-z0-9-]+)"
+                               r"(\.(?P<db_name>[a-z0-9_-]+))?"
+                               f"/{login}")
     for res in json.loads(contents)["checkpoint"]["latest"]["resources"]:
         urn = res["urn"]
-        if match := urn_pattern.match(urn):
+        if match := grant_pattern.match(urn):
             region = match.group("region") or default_region
             db_id = match.group("db_id")
-            databases.setdefault(region, []).append(db_id)
+            db_name = res["inputs"]["database"]
+            databases.setdefault(region, {}).setdefault(db_id, []).append(db_name)
     return databases
 
 
