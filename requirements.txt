@@ -1,6 +1,5 @@
 boto3
 Flask
-Flask-Bootstrap4
 Jinja2
 prodict
 pysaml2

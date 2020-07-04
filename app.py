@@ -8,7 +8,6 @@ from typing import Dict, List, Optional, Tuple
 
 import boto3
 from flask import Flask, render_template, request, session, url_for
-from flask_bootstrap import Bootstrap
 from prodict import Prodict
 from saml2 import BINDING_HTTP_POST, BINDING_HTTP_REDIRECT, entity
 from saml2.client import Saml2Client
@@ -28,7 +27,6 @@ SARI_PARAM_PRIMARY_AWS_REGION = "PRIMARY_AWS_REGION"
 app = Flask(__name__)
 app.config['APPLICATION_ROOT'] = os.environ.get('FLASK_APPLICATION_ROOT', '/')
 app.config['sso_url'] = os.environ['SSO_URL']
-Bootstrap(app)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", str(uuid.uuid4()))
 logging.basicConfig(level=logging.DEBUG)
 
@@ -45,6 +43,7 @@ def idp_initiated(idp_name):
     session["login"] = user_info.text
 
     aws_roles = saml_enum_aws_roles(authn_response)
+    accounts = saml_enum_account_aliases(authn_response)
 
     if not aws_roles:
         raise ValueError("Invalid assertion: no roles defined")
@@ -53,7 +52,6 @@ def idp_initiated(idp_name):
     elif 'account_id' in request.form:
         account_id = request.form['account_id']
     else:
-        accounts = saml_enum_account_aliases(authn_response)
         return render_template('select_account.html', accounts=accounts, saml_assertion=saml_assertion)
 
     role_arn, principal_arn = aws_roles[account_id]
@@ -75,13 +73,27 @@ def idp_initiated(idp_name):
     session["aws_credentials"] = aws_credentials
     session["sari_config"] = get_sari_config(aws_credentials)
 
-    return render_template('db_config.html', session=session)
+    account = dict(alias=accounts[account_id], id=account_id)
+    return render_template('db_config.html', session=session, aws_account=account)
+
+
+@app.route("/logout", methods=["POST"])
+def logout():
+    return do_farewell(header1="You are logged out!")
+
+
+@app.route("/farewell", methods=["POST"])
+def farewell():
+    header1 = request.form["header1"]
+    header2 = request.form.get("header2", "")
+    emoji = request.form.get("emoji")
+    return do_farewell(header1=header1, header2=header2, emoji=emoji)
 
 
 # noinspection PyUnusedLocal
 @app.errorhandler(404)
 def error_not_found(error):
-    return render_template('not_found.html')
+    return do_farewell(header1="Oops!", header2="The requested page was not found", emoji="sad")
 
 
 @app.route("/api/databases")
@@ -115,6 +127,16 @@ def get_db_configuration(region, db_identifier, db_name):
         "rds_password": token,
         "db_name": db_name,
     }
+
+
+def do_farewell(header1, header2=None, emoji=None):
+    session["aws_credentials"] = {}
+    session["sari_config"] = {}
+
+    return render_template('farewell.html',
+                           header1=header1,
+                           header2=(header2 or ""),
+                           emoji_url=url_for('static', filename=f'assets/{emoji or "see-ya"}.png'))
 
 
 def saml_client_for(idp_name=None):

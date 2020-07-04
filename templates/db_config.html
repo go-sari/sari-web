@@ -1,57 +1,43 @@
-{% extends "base.html" %}
+{% extends "io_page.html" %}
+
 {% block styles %}
     {{ super() }}
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/css/bootstrap-select.min.css">
-    <style media="screen" type="text/css">
-        div.success-pane, div.error-pane {
-            display: none;
-        }
-    </style>
 {% endblock %}
-{% block content %}
-    <div class="jumbotron jumbotron-fluid pb-5 mb-5">
-        <div class="success-pane container">
-            <h1 class="mb-5">SARI Web</h1>
-            <p class="lead">Get the configuration parameters to access an RDS instance.</p>
-            <form class="form-inline">
-                <div class="row align-items-end">
-                    <div class="col-md d-flex flex-column col-form-label-sm align-items-start">
-                        <label for="region">AWS Region:</label>
-                        <select id="region" class="form-control" data-width="auto">
-                        </select>
-                    </div>
-                    <div class="col-md d-flex flex-column col-form-label-sm align-items-start">
-                        <label for="db_id">DB Identifier:</label>
-                        <select id="db_id" class="form-control" data-live-search="true" data-size="10"
-                                data-width="auto">
-                        </select>
-                    </div>
-                    <div class="col-md d-flex flex-column col-form-label-sm align-items-start">
-                        <label for="sel_db_name">Database:</label>
-                        <select id="sel_db_name" class="form-control" data-live-search="true" data-size="10"
-                                data-width="auto">
-                        </select>
-                    </div>
-                    <div class="col-md col-form-label-sm">
-                        <button id="get_config" type="button" class="btn btn-outline-success form-control">Get
-                            Configuration
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div class="error-pane container text-center">
-            <h1 class="mb-2">SARI Web</h1>
-            <img class="w-25 mb-4" src="{{ url_for('static', filename='assets/confused.png') }}" alt="confused emoji">
-            <p id="error-message" class="lead"></p>
-            <div class="error-actions">
-                <a href="{{ config['sso_url'] }}" class="btn btn-primary btn-lg">
-                    <span class="glyphicon glyphicon-home"></span>Okta Home</a>
+
+{% block jumbo_contents_top %}
+    <p class="lead">Get the configuration parameters to access an RDS instance:</p>
+    <form class="form-inline">
+        <div class="row align-items-end">
+            <div class="col-md d-flex flex-column col-form-label-sm align-items-start">
+                <label for="region">AWS Region:</label>
+                <select id="region" class="form-control" data-width="auto">
+                </select>
+            </div>
+            <div class="col-md d-flex flex-column col-form-label-sm align-items-start">
+                <label for="db_id">DB Identifier:</label>
+                <select id="db_id" class="form-control" data-live-search="true" data-size="10"
+                        data-width="auto">
+                </select>
+            </div>
+            <div class="col-md d-flex flex-column col-form-label-sm align-items-start">
+                <label for="sel_db_name">Database:</label>
+                <select id="sel_db_name" class="form-control" data-live-search="true" data-size="10"
+                        data-width="auto">
+                </select>
+            </div>
+            <div class="col-md col-form-label-sm">
+                <button id="get_config" type="button" class="btn btn-outline-success form-control">Get
+                    Configuration
+                </button>
             </div>
         </div>
-    </div>
-    <div class="success-pane container">
+    </form>
+{% endblock %}
+
+{% block jumbo_contents_bottom %}
+    <div class="container">
         <form>
             {% for width, label, id_ in [
             (3, "SSH Hostname", "bh_hostname"),
@@ -69,8 +55,7 @@
                         <div class="input-group mb-3">
                             <input type="text" class="form-control d-inline-block text-truncate" id="{{ id_ }}" readonly>
                             <button type="button" class="btn" data-clipboard-target="#{{ id_ }}">
-                                <img src="{{ url_for('static', filename='assets/clippy.svg') }}" width="13"
-                                     alt="Copy to clipboard">
+                                <i class="fa fa-copy"></i>
                             </button>
                         </div>
                     </div>
@@ -79,10 +64,15 @@
         </form>
     </div>
 {% endblock %}
+
 {% block scripts %}
     {{ super() }}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/js/bootstrap-select.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.18/dist/js/bootstrap-select.min.js"
+            integrity="sha384-x8fxIWvLdZnkRaCvkDXOlxd6UP+qga975FjnbRp6NRpL9jjXjY9TwF9y7z4AccxS"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"
+            integrity="sha384-x6nRSkfSsKGBsvlLFHHNju+buS3zYUztVnTRz/0JKgOIk3ulS6bNce/vHOvYE2eY"
+            crossorigin="anonymous"></script>
     <script>
         let databases = null;
 
@@ -95,10 +85,12 @@
             $.getJSON("{{ url_for('list_databases') }}", function (databases_) {
                 databases = databases_;
                 if ($.isEmptyObject(databases)) {
-                    ready_for_error("Sorry, but we couldn't find any RDS instance you are allowed to access " +
-                        "on this AWS account.");
+                    $.redirectPost("{{ url_for('farewell') }}", {
+                        header1: "Oops!",
+                        header2: "Sorry, but we couldn't find any RDS instance you are allowed to access on this AWS account.",
+                        emoji: "confused"
+                    })
                 } else {
-                    ready_for_success();
                     fill_select_picker("#region", Object.keys(databases).sort());
                 }
             })
@@ -137,17 +129,6 @@
             });
             select.selectpicker('refresh');
             select.change();
-        }
-
-        function ready_for_success() {
-            $('.error-pane').hide();
-            $('.success-pane').show();
-        }
-
-        function ready_for_error(message) {
-            $('.success-pane').hide();
-            $('#error-message').text(message);
-            $('.error-pane').show();
         }
     </script>
 {% endblock %}

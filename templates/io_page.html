@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block styles %}
+    {{ super() }}
+    <style type="text/css">
+        .navbar-dark {
+            color: white;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="jumbotron pb-5 mb-5 pt-0">
+        <div class="container">
+            <nav class="navbar navbar-dark bg-secondary justify-content-between mb-5">
+                <a class="navbar-brand">SARI Web</a>
+                {# or use a "block navbar-contents" #}
+                {% if aws_account %}
+                    <form class="form-inline">
+                        <label for="region" class="pr-2">AWS Account:</label>
+                        <input id="account_id" class="form-control mr-sm-2" type="text"
+                               value="{{ aws_account.alias }} ({{ aws_account.id }})"
+                               readonly>
+                    </form>
+                {% endif %}
+                <form class="form-inline" action="{{ url_for("logout") }}" method="post">
+                    <button class="btn btn-dark" type="submit">Exit<i class="fa fa-sign-out ml-2"></i>
+                    </button>
+                </form>
+            </nav>
+            {% block jumbo_contents_top %}
+            {% endblock %}
+        </div>
+    </div>
+    {% block jumbo_contents_bottom %}
+    {% endblock %}
+{% endblock %}
