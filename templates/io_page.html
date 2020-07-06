@@ -6,6 +6,9 @@
         .navbar-dark {
             color: white;
         }
+        .navbar-brand {
+            text-shadow: black 0.05em 0.05em 0.04em;
+        }
     </style>
 {% endblock %}
 
@@ -13,7 +16,7 @@
     <div class="jumbotron pb-5 mb-5 pt-0">
         <div class="container">
             <nav class="navbar navbar-dark bg-secondary justify-content-between mb-5">
-                <a class="navbar-brand">SARI Web</a>
+                <a class="navbar-brand font-weight-bold">SARI Web</a>
                 {# or use a "block navbar-contents" #}
                 {% if aws_account %}
                     <form class="form-inline">
