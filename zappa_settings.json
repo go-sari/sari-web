@@ -3,7 +3,6 @@
         "environment_variables": {
             "FLASK_APPLICATION_ROOT": "/_",
             "FLASK_SECRET_KEY": "4344F28D-6CD0-4E13-8F78-870C5FDB3551",
-            "SSO_URL": "https://dev-203763.okta.com"
         },
         "app_function": "app.app",
         "project_name": "sari-web",
