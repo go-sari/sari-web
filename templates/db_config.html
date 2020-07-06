@@ -128,6 +128,8 @@
                 select.append(new Option(key, key))
             });
             select.selectpicker('refresh');
+            {# To force update the 'width' CSS attribute. #}
+            select.trigger('loaded.bs.select');
             select.change();
         }
     </script>
