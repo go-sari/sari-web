@@ -62,7 +62,7 @@
 
                     <div class="col-sm-{{ width }}">
                         <div class="input-group {{ ['input-group', id_] | join('-') | replace('_', '-') }} mb-3">
-                            <input type="text" class="form-control d-inline-block text-truncate" id="{{ id_ }}" readonly>
+                            <input type="text" class="form-control d-inline-block text-truncate db-param" id="{{ id_ }}" readonly>
                             <button type="button" class="btn" data-clipboard-target="#{{ id_ }}"
                                     {# Use .form-control:disabled color. See definitions of $input-disabled-bg in: #}
                                     {# https://github.com/twbs/bootstrap/blob/main/scss/_variables.scss #}
@@ -113,6 +113,14 @@
 
         $("#db_id").change(function () {
             fill_select_picker("#sel_db_name", databases[$("#region").val()][$("#db_id").val()].sort());
+            clear_db_parameters();
+        })
+
+        $("#sel_db_name").change(function () {
+            let db_name = $("#db_name")
+            if (db_name.val() !== "") {
+                db_name.val($("#sel_db_name").val())
+            }
         })
 
         $("#rds_password").change(function () {
@@ -196,5 +204,10 @@
             select.trigger('loaded.bs.select');
             select.change();
         }
+
+        function clear_db_parameters() {
+            $(".db-param").val("").change();
+        }
+
     </script>
 {% endblock %}
