@@ -3,11 +3,20 @@
 {% block styles %}
     {{ super() }}
     <style type="text/css">
-        .navbar-dark {
-            color: white;
-        }
         .navbar-brand {
+            font-size: 2rem!important;
             text-shadow: black 0.05em 0.05em 0.04em;
+        }
+        .nav-label {
+            color: black;
+            background-color: #f8f9fa;
+            opacity: 0.65;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+        .nav-button {
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
         }
     </style>
 {% endblock %}
@@ -15,20 +24,33 @@
 {% block content %}
     <div class="jumbotron pb-5 mb-5 pt-0">
         <div class="container">
-            <nav class="navbar navbar-dark bg-secondary justify-content-between mb-5">
+            <nav class="navbar navbar-dark bg-secondary justify-content-between py-1 mb-5">
                 <a class="navbar-brand font-weight-bold">SARI Web</a>
-                {# or use a "block navbar-contents" #}
                 {% if aws_account %}
-                    <form class="form-inline">
-                        <label for="region" class="pr-2">AWS Account:</label>
-                        <input id="account_id" class="form-control mr-sm-2" type="text"
-                               value="{{ aws_account.alias }} ({{ aws_account.id }})"
-                               readonly>
+                    <form class="form-inline align-items-end">
+                    <div class="col-auto col-form-label-sm py-0">
+                        <label class="nav-label">AWS Account</label>
+                        <button class="btn btn-light nav-button py-0" type="button" disabled>
+                            {{ aws_account.alias }} ({{ aws_account.id }})
+                        </button>
+                    </div>
                     </form>
                 {% endif %}
-                <form class="form-inline" action="{{ url_for("logout") }}" method="post">
-                    <button class="btn btn-dark" type="submit">Exit<i class="fa fa-sign-out ml-2"></i>
-                    </button>
+                <form class="form-inline d-flex align-items-stretch" action="{{ url_for("logout") }}" method="post">
+                    {% if session_timeout %}
+                        <div class="col-auto col-form-label-sm py-0">
+                            <label class="nav-label">Session End</label>
+                            <button class="btn btn-light text-monospace nav-button py-0" type="button" disabled>
+                                <span id="session_timeout">00:00:00</span>
+                            </button>
+                        </div>
+                    {% endif %}
+                    <div class="pr-0">
+                        <button class="btn btn-dark px-3" type="submit"
+                                style="height: 100%; font-size: 1.25rem;">
+                            Exit<i class="fa fa-sign-out ml-2"></i>
+                        </button>
+                    </div>
                 </form>
             </nav>
             {% block jumbo_contents_top %}
@@ -37,4 +59,31 @@
     </div>
     {% block jumbo_contents_bottom %}
     {% endblock %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/min/moment.min.js"
+            integrity="sha256-ZsWP0vT+akWmvEMkNYgZrPHKU9Ke8nYBPC3dqONp1mY="
+            crossorigin="anonymous"></script>
+    {% if session_timeout %}
+        <script>
+            let session_timeout = {{ session_timeout }};
+            let session_timer = null
+
+            $(document).ready(function () {
+                session_timer = setInterval(function () {
+                    let secs_left = Math.max(Math.round(session_timeout - (new Date().getTime() / 1000)), 0);
+                    let time_left = moment.unix(secs_left).utc();
+                    $("#session_timeout").text(time_left.format("HH:mm:ss"));
+                    if (secs_left === 0) {
+                        $.redirectPost("{{ url_for('farewell') }}", {
+                            header1: "Session Timeout",
+                            emoji: "see-ya"
+                        })
+                    }
+                })
+            })
+        </script>
+    {% endif %}
 {% endblock %}
