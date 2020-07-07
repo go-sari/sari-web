@@ -51,7 +51,8 @@ def idp_initiated(idp_name):
     elif 'account_id' in request.form:
         account_id = request.form['account_id']
     else:
-        return render_template('select_account.html', accounts=accounts, saml_assertion=saml_assertion)
+        return render_template('select_account.html', accounts=accounts, saml_assertion=saml_assertion,
+                               session_timeout=authn_response.not_on_or_after)
 
     role_arn, principal_arn = aws_roles[account_id]
 
@@ -73,7 +74,8 @@ def idp_initiated(idp_name):
     session["sari_config"] = get_sari_config(aws_credentials)
 
     account = dict(alias=accounts[account_id], id=account_id)
-    return render_template('db_config.html', session=session, aws_account=account)
+    return render_template('db_config.html', session=session, aws_account=account,
+                           session_timeout=int(aws_credentials['Expiration'].timestamp()))
 
 
 @app.route("/logout", methods=["POST"])
