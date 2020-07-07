@@ -2,11 +2,13 @@
 import json
 import logging
 import os
+import pkgutil
 import re
 import uuid
 from typing import Dict, List, Optional, Tuple
 
 import boto3
+import botocore
 from flask import Flask, render_template, request, session, url_for
 from prodict import Prodict
 from saml2 import BINDING_HTTP_POST, BINDING_HTTP_REDIRECT, entity
@@ -28,6 +30,8 @@ app = Flask(__name__)
 app.config['APPLICATION_ROOT'] = os.environ.get('FLASK_APPLICATION_ROOT', '/')
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", str(uuid.uuid4()))
 logging.basicConfig(level=logging.DEBUG)
+
+_aws_regions_descriptions = {}
 
 
 @app.route("/saml/idp/<idp_name>", methods=['POST'])
@@ -102,7 +106,11 @@ def list_databases():
     """
     List all RDS instances enabled for the current user, grouped by region.
     """
-    return load_db_instances()
+    descriptions = load_regions_descriptions()
+    return {name: dict(
+        location=descriptions.get(name, name),
+        instances=instances
+    ) for name, instances in load_db_instances().items()}
 
 
 @app.route("/api/db_config/<region>/<db_identifier>/<db_name>")
@@ -327,6 +335,16 @@ def hack_disable_response_verify():
     if not _patched:
         StatusResponse.__getattribute__ = new_getattribute
         _patched = True
+
+
+def load_regions_descriptions() -> Dict[str, str]:
+    global _aws_regions_descriptions
+    if not _aws_regions_descriptions:
+        data = pkgutil.get_data(botocore.__name__, "data/endpoints.json")
+        json.loads(data.decode())
+        regions = json.loads(data.decode())["partitions"][0]["regions"]
+        _aws_regions_descriptions = {name: region["description"] for name, region in regions.items()}
+    return _aws_regions_descriptions
 
 
 if __name__ == "__main__":
