@@ -108,11 +108,11 @@
         })
 
         $("#region").change(function () {
-            fill_select_picker("#db_id", Object.keys(databases[$("#region").val()]).sort());
+            fill_select_picker("#db_id", Object.keys(databases[$("#region").val()]["instances"]).sort());
         })
 
         $("#db_id").change(function () {
-            fill_select_picker("#sel_db_name", databases[$("#region").val()][$("#db_id").val()].sort());
+            fill_select_picker("#sel_db_name", databases[$("#region").val()]["instances"][$("#db_id").val()].sort());
             clear_db_parameters();
         })
 
@@ -188,16 +188,30 @@
                         emoji: "confused"
                     })
                 } else {
-                    fill_select_picker("#region", Object.keys(databases).sort());
+                    fill_select_picker("#region", Object.keys(databases).sort(),
+                        function (id) {
+                            return {
+                                "value": id,
+                                "text": databases[id]["location"],
+                                "subtext": id
+                            }
+                        });
                 }
             })
         }
 
-        function fill_select_picker(id, options) {
+        function fill_select_picker(id, options, optionFactory) {
             const select = $(id);
             select.empty()
             options.forEach(function (key) {
-                select.append(new Option(key, key))
+                let option;
+                if (optionFactory) {
+                    let data = optionFactory(key)
+                    option = $(`<option value="${data['value']}" data-subtext="${data['subtext']}">${data["text"]}</option>`);
+                } else {
+                    option = $(`<option value="${key}">${key}</option>`);
+                }
+                select.append(option)
             });
             select.selectpicker('refresh');
             {# To force update the 'width' CSS attribute. #}
