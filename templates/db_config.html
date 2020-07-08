@@ -81,6 +81,13 @@
             {% endfor %}
         </form>
     </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="spinnerModal">
+        <div class="modal-dialog modal-dialog-centered text-center" role="document">
+            <span class="fa fa-spinner fa-spin fa-3x w-100"></span>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -96,6 +103,7 @@
         let pwd_expires_msec = null;
         let pwd_expire_instant = null;
         let pwd_expire_timer = null;
+        let spinnerModal = $('#spinnerModal')
 
         let clipboard = new ClipboardJS('.btn');
         clipboard.on("success", function (e) {
@@ -157,12 +165,28 @@
             let url = `{{ url_for('get_db_configuration', region="${region}", db_identifier='${db_id}', db_name='${db_name}')
                           | replace("%24%7B", "${")
                           | replace("%7D", "}")}}`;
-            $.getJSON(url, function (config) {
+
+            getJSON(url, function (config) {
                 for (const [key, value] of Object.entries(config)) {
                     $(`#${key}`).val(value).change();
                 }
             })
         })
+
+        function getJSON(url, success) {
+            let completed = false
+            spinnerModal.one('shown.bs.modal', function () {
+                // modal('hide') doesn't work if the 'show' transition is still ongoing.
+                // See https://github.com/twbs/bootstrap/issues/25008#issuecomment-575259382
+                if (completed)
+                    spinnerModal.modal('hide');
+            }).modal('show');
+            $.getJSON(url, success)
+                .always(function () {
+                    completed = true
+                    spinnerModal.modal('hide');
+                })
+        }
 
         function stsTokenAmzProperties(token) {
             return Object.assign({}, ...token.split('&')
@@ -179,7 +203,7 @@
         }
 
         function load_databases() {
-            $.getJSON("{{ url_for('list_databases') }}", function (databases_) {
+            getJSON("{{ url_for('list_databases') }}", function (databases_) {
                 databases = databases_;
                 if ($.isEmptyObject(databases)) {
                     $.redirectPost("{{ url_for('farewell') }}", {
