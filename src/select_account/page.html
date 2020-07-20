@@ -2,11 +2,7 @@
 
 {% block styles %}
     {{ super() }}
-    <style media="screen" type="text/css">
-        .custom-control-label::before {
-            background-color: #ffe693;
-        }
-    </style>
+    <link rel=stylesheet href="{{ url_for('static', filename='css/select_account.css') }}"/>
 {% endblock %}
 
 {% block jumbo_contents_top %}
@@ -26,3 +22,7 @@
     </form>
 {% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/select_account.bundle.js') }}"></script>
+{% endblock %}

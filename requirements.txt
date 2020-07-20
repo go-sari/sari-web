@@ -1,5 +1,0 @@
-boto3
-Flask
-Jinja2
-prodict
-pysaml2

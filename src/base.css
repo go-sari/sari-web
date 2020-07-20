@@ -1,0 +1,29 @@
+body {
+    font-family: 'Titillium Web', sans-serif;
+}
+
+.font-weight-bold {
+    font-weight: 600 !important;
+}
+
+.text-monospace {
+    font-family: 'Roboto', monospace !important;
+}
+
+.navbar-brand {
+    font-size: 2rem !important;
+    text-shadow: black 0.05em 0.05em 0.04em;
+}
+
+.nav-label {
+    color: black;
+    background-color: #f8f9fa;
+    opacity: 0.65;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.nav-button {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}

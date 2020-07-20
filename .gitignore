@@ -6,3 +6,5 @@
 terraform.tfstate*
 
 sari-web-template-*.json
+node_modules/
+dist/
