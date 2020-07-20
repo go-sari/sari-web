@@ -1,0 +1,10 @@
+@import "../base.css";
+
+.input-group-rds-password {
+    margin-bottom: 2px !important;
+}
+
+.progress {
+    height: 4px;
+    margin-bottom: 10px;
+}

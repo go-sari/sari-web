@@ -1,26 +1,5 @@
 {% extends "base.html" %}
 
-{% block styles %}
-    {{ super() }}
-    <style type="text/css">
-        .navbar-brand {
-            font-size: 2rem!important;
-            text-shadow: black 0.05em 0.05em 0.04em;
-        }
-        .nav-label {
-            color: black;
-            background-color: #f8f9fa;
-            opacity: 0.65;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-        }
-        .nav-button {
-            border-top-left-radius: 0;
-            border-top-right-radius: 0;
-        }
-    </style>
-{% endblock %}
-
 {% block content %}
     <div class="jumbotron pb-5 mb-5 pt-0">
         <div class="container">
@@ -36,7 +15,7 @@
                     </div>
                     </form>
                 {% endif %}
-                <form class="form-inline d-flex align-items-stretch" action="{{ url_for("logout") }}" method="post">
+                <form class="form-inline d-flex align-items-stretch" action="{{ url_for("web_bp.logout") }}" method="post">
                     {% if session_timeout %}
                         <div class="col-auto col-form-label-sm py-0">
                             <label class="nav-label">Session End</label>
@@ -64,26 +43,9 @@
 {% block scripts %}
     {{ super() }}
     <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/min/moment.min.js"
-            integrity="sha256-ZsWP0vT+akWmvEMkNYgZrPHKU9Ke8nYBPC3dqONp1mY="
+            integrity="sha384-2B/wBCdjAUU/YBoPNyeMGxfXWhtxcQaDnAg02ilzQ6Y2Zqq9XalRKILiKDNj75ow"
             crossorigin="anonymous"></script>
-    {% if session_timeout %}
-        <script>
-            let session_timeout = {{ session_timeout }};
-            let session_timer = null
-
-            $(document).ready(function () {
-                session_timer = setInterval(function () {
-                    let secs_left = Math.max(Math.round(session_timeout - (new Date().getTime() / 1000)), 0);
-                    let time_left = moment.unix(secs_left).utc();
-                    $("#session_timeout").text(time_left.format("HH:mm:ss"));
-                    if (secs_left === 0) {
-                        $.redirectPost("{{ url_for('farewell') }}", {
-                            header1: "Session Timeout",
-                            emoji: "see-ya"
-                        })
-                    }
-                })
-            })
-        </script>
-    {% endif %}
+    <script>
+        let session_timeout = {{ session_timeout }};
+    </script>
 {% endblock %}

@@ -1,0 +1,5 @@
+@import "../base.css";
+
+.custom-control-label::before {
+    background-color: #ffe693;
+}
