@@ -1,0 +1,10 @@
+*
+!requirements.txt
+!*.py
+!*.sh
+!*.awk
+!Pipfile
+!Pipfile.lock
+!/src/
+!/common/
+!/dist/

@@ -15,6 +15,12 @@ def aws_get_enabled_db_instances(boto3_session: boto3.session.Session,
     return filter_allowed_instances(pulumi_state, sari_config.primary_aws_region, login, sari_config.pulumi_stack_name)
 
 
+def aws_list_managed_db_instances(boto3_session: boto3.session.Session,
+                                  sari_config: SariConfig) -> Dict[str, List[str]]:
+    pulumi_state = load_pulumi_state(boto3_session, sari_config)
+    return filter_managed_instances(pulumi_state)
+
+
 def load_pulumi_state(boto3_session: boto3.session.Session, sari_config: SariConfig):
     pulumi_backend_bucket = s3_bucket_name_from_url(sari_config.pulumi_backend_url)
     stack_file = f".pulumi/stacks/{sari_config.pulumi_stack_name}.json"
@@ -48,4 +54,21 @@ def filter_allowed_instances(pulumi_state, default_region, login, pulumi_stack_n
             db_id = match.group("db_id")
             db_name = res["inputs"]["database"]
             databases.setdefault(region, {}).setdefault(db_id, []).append(db_name)
+    return databases
+
+
+def filter_managed_instances(pulumi_state) -> Dict[str, List[str]]:
+    databases = dict()
+    # Endpoint example:
+    # blackwells.c36k3kl10p4v.eu-west-1.rds.amazonaws.com:3306
+    endpoint_pattern = re.compile(r"(?P<name>[a-z0-9-]+)"
+                                  r"\.[a-z0-9-]+"
+                                  r"\.(?P<region>[a-z0-9-]+)"
+                                  r"\.rds\.amazonaws\.com:[0-9]+")
+    for res in pulumi_state["checkpoint"]["latest"]["resources"]:
+        if res["type"] == "pulumi:providers:mysql":
+            if match := endpoint_pattern.match(res["inputs"]["endpoint"]):
+                name = match.group("name")
+                region = match.group("region")
+                databases.setdefault(region, []).append(name)
     return databases

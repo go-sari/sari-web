@@ -5,6 +5,11 @@
 .terraform/
 terraform.tfstate*
 
-sari-web-template-*.json
 node_modules/
 dist/
+
+sari-web-template-*.json
+*.tar.gz
+*.zip
+.mypy_cache/
+output/

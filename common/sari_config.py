@@ -14,7 +14,7 @@ class SariConfig:
         self.primary_aws_region = primary_aws_region
 
     def to_json(self):
-        return json.dumps(self.__dict__)
+        return json.dumps(vars(self))
 
     @classmethod
     def from_json(cls, json_str):
