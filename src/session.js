@@ -1,6 +1,6 @@
 import moment from 'moment';
-
-import "./jquery_ext";
+import 'bootstrap';
+import bootbox from 'bootbox';
 
 if (session_timeout) {
     let session_timer = null
@@ -11,11 +11,15 @@ if (session_timeout) {
             let time_left = moment.unix(secs_left).utc();
             $("#session_timeout").text(time_left.format("HH:mm:ss"));
             if (secs_left === 0) {
-                $.redirectPost("/farewell", {
-                    header1: "Session Timeout",
-                    emoji: "see-ya"
+                clearInterval(session_timer)
+                bootbox.dialog({
+                    title: "Session Timeout",
+                    message: "You can now close this window!",
+                    centerVertical: true,
+                    onEscape: false,
+                    closeButton: false
                 })
             }
-        })
+        }, 1000)
     })
 }

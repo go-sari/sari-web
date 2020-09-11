@@ -3,8 +3,8 @@ import "./style.css";
 import ClipboardJS from 'clipboard';
 import axios from "axios";
 import moment from 'moment';
+import bootbox from "bootbox";
 
-import "../jquery_ext"
 import "../session"
 
 let databases = null;
@@ -114,10 +114,12 @@ function load_databases() {
     getJSON(url, function (databases_) {
         databases = databases_;
         if ($.isEmptyObject(databases)) {
-            $.redirectPost("/farewell", {
-                header1: "Oops!",
-                header2: "Sorry, but we couldn't find any RDS instance you are allowed to access on this AWS account.",
-                emoji: "confused"
+            bootbox.dialog({
+                title: "Oops!",
+                message: "Sorry, but we couldn't find any RDS instance you are allowed to access on this AWS account.",
+                centerVertical: true,
+                onEscape: false,
+                closeButton: false
             })
         } else {
             fill_select_picker("#region", Object.keys(databases).sort(),

@@ -53,11 +53,6 @@ def logout():
     return do_farewell(header1="You are logged out!")
 
 
-@web_bp.route("/farewell", methods=["POST"])
-def farewell():
-    return do_farewell(**request.form)
-
-
 # noinspection PyUnusedLocal
 @web_bp.errorhandler(404)
 def error_not_found(error):

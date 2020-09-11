@@ -28,6 +28,7 @@ module.exports = {
     ],
     externals: {
         axios: 'axios',
+        bootbox: 'bootbox',
         clipboard: 'ClipboardJS',
         jquery: 'jQuery',
         moment: 'moment',
