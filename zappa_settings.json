@@ -1,8 +1,7 @@
 {
     "_": {
         "environment_variables": {
-            "FLASK_APPLICATION_ROOT": "/_",
-            "FLASK_SECRET_KEY": "4344F28D-6CD0-4E13-8F78-870C5FDB3551",
+            "FLASK_SECRET_KEY": "4344F28D-6CD0-4E13-8F78-870C5FDB3551"
         },
         "app_function": "app.app",
         "project_name": "sari-web",

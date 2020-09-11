@@ -1,5 +1,4 @@
 import moment from 'moment';
-import path from 'path';
 
 import "./jquery_ext";
 
@@ -12,7 +11,7 @@ if (session_timeout) {
             let time_left = moment.unix(secs_left).utc();
             $("#session_timeout").text(time_left.format("HH:mm:ss"));
             if (secs_left === 0) {
-                $.redirectPost(path.resolve(applicationRoot, "farewell"), {
+                $.redirectPost("/farewell", {
                     header1: "Session Timeout",
                     emoji: "see-ya"
                 })

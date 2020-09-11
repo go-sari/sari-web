@@ -6,7 +6,6 @@ import moment from 'moment';
 
 import "../jquery_ext"
 import "../session"
-import path from "path";
 
 let databases = null;
 let pwd_expires_msec = null;
@@ -115,7 +114,7 @@ function load_databases() {
     getJSON(url, function (databases_) {
         databases = databases_;
         if ($.isEmptyObject(databases)) {
-            $.redirectPost(path.resolve(applicationRoot, "farewell"), {
+            $.redirectPost("/farewell", {
                 header1: "Oops!",
                 header2: "Sorry, but we couldn't find any RDS instance you are allowed to access on this AWS account.",
                 emoji: "confused"
