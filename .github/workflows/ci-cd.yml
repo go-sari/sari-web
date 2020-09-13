@@ -1,0 +1,53 @@
+
+name: CI/CD
+
+on:
+  create:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set RELEASE_VERSION
+      run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10}-${GITHUB_SHA:0:7})
+
+    - name: Set ARCHIVE_NAME
+      run: echo ::set-env name=ARCHIVE_NAME::sari-web-${RELEASE_VERSION}.zip
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: cached node_modules
+      uses: actions/cache@v2
+      with:
+        path: node_modules/
+        key: ${{ runner.os }}.node_modules
+
+    - name: Install Webpack Modules
+      run: |
+        yarn install
+        yarn run build
+
+    - name: Build Lambda Package
+      run: |
+        set -euo pipefail
+
+        mkdir workdir
+        pip install -r <(./gen-requirements.sh) --target workdir/
+        cp -pr *.py src common dist workdir
+        cd workdir
+        printf "app_version = \"$RELEASE_VERSION\"" > version.py
+        find . -name \*.so -exec strip --verbose --strip-unneeded --preserve-dates {} \;
+        zip -qr9 ../$ARCHIVE_NAME .
+
+    - name: Publish Release
+      run: aws s3 cp $ARCHIVE_NAME s3://${{ secrets.S3_DEPLOYMENT_BUCKET }}
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

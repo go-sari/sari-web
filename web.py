@@ -11,6 +11,12 @@ from common import (
     sts_assume_role_with_saml,
 )
 
+try:
+    # noinspection PyUnresolvedReferences
+    from version import app_version
+except ModuleNotFoundError:
+    app_version = "LATEST"
+
 web_bp = Blueprint('web_bp', __name__)
 
 
@@ -23,6 +29,7 @@ def idp_initiated(idp_name):
     authn_response = saml_client.parse_authn_request_response(saml_assertion, entity.BINDING_HTTP_POST)
     user_info = authn_response.get_subject()
     session["login"] = user_info.text
+    session["app_version"] = app_version
 
     aws_roles = saml_enum_aws_roles(authn_response)
     accounts = saml_enum_account_aliases(authn_response)

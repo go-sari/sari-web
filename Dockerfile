@@ -19,8 +19,8 @@ RUN find . -name \*.so \
 
 COPY . .
 
-ARG tag=LATEST
-RUN zip -qr9 /opt/sari-web-${tag}-$(date +%s).zip .
+ARG archive_name=sari-web-LATEST.zip
+RUN zip -qr9 /opt/$archive_name .
 
 FROM scratch
 COPY --from=build /opt /

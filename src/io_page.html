@@ -4,7 +4,12 @@
     <div class="jumbotron pb-5 mb-5 pt-0">
         <div class="container">
             <nav class="navbar navbar-dark bg-secondary justify-content-between py-1 mb-5">
-                <a class="navbar-brand font-weight-bold">SARI Web</a>
+                <form class="form-inline align-items-end">
+                    <div class="col-auto px-0 py-0">
+                        <a class="navbar-brand font-weight-bold mr-0 pb-0" style="line-height: 24px">SARI Web</a>
+                        <label class="navbar-text py-0" style="line-height: 20px">{{ session.app_version }}</label>
+                    </div>
+                </form>
                 {% if aws_account %}
                     <form class="form-inline align-items-end">
                     <div class="col-auto col-form-label-sm py-0">
