@@ -13,3 +13,4 @@ sari-web-template-*.json
 *.zip
 .mypy_cache/
 output/
+wiki/
