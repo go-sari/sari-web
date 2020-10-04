@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "sari-web"
+version = "1.1.0"
+description = "The SARI frontend"
+authors = [
+    "Eliezio Oliveira <eliezio@pm.me>"
+]
+
+[tool.poetry.dependencies]
+python = "~3.8"
+aws-wsgi = "*"
+boto3 = "*"
+botocore = "*"
+Flask = "~1.1"
+Jinja2 = "~2"
+paste = "*"
+prodict = "*"
+pysaml2 = "*"
+waitress = "*"
