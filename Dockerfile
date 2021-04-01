@@ -13,7 +13,9 @@ COPY gen-requirements.sh filter-pkgs.awk Pipfile Pipfile.lock src/
 WORKDIR src
 
 RUN ./gen-requirements.sh > /tmp/requirements.txt
-RUN pip3.8 install -r /tmp/requirements.txt --target .
+RUN set -eux; \
+    pip3.8 install -U pip; \
+    pip3.8 install -r /tmp/requirements.txt --target .
 RUN find . -name \*.so \
     -exec strip --verbose --strip-unneeded --preserve-dates {} \;
 
