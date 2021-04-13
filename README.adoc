@@ -18,6 +18,12 @@ Example: `ASIAZEG7KKNUPTN2FDQY`
 Example: `7afOojuPG4EwaVC7oX6qBsFS1ih0qymEWyY+EF+4`
 | `sari_web_AWS_SECRET_ACCESS_KEY_encrypted` (after decryption)
 
+| AWS_DEFAULT_REGION
+| The corresponding AWS Region.
+
+Example: `eu-west-1`
+| `sari_web_AWS_DEFAULT_REGION`
+
 | S3_DEPLOYMENT_BUCKET
 | The AWS S3 bucket name created to hold the Lambda package.
 
