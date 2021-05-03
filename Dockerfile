@@ -39,7 +39,3 @@ RUN printf "app_version = \"%s\"" "$VERSION" > version.py; \
 FROM alpine:3.13
 
 COPY --from=build /opt /opt
-
-VOLUME /out
-CMD ["cp", "-pv", "/opt/sari-web.zip", "/out/sari-web.zip"]
-
