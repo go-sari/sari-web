@@ -1,5 +1,5 @@
 
-name: CI/CD
+name: Build and publish package
 
 on:
   create:
@@ -8,17 +8,18 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    env:
-      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
 
     - name: Set RELEASE_VERSION
-      run: echo ::set-env name=RELEASE_VERSION::$(echo ${GITHUB_REF:10}-${GITHUB_SHA:0:7})
-
-    - name: Set ARCHIVE_NAME
-      run: echo ::set-env name=ARCHIVE_NAME::sari-web-${RELEASE_VERSION}.zip
+      run: |
+        RELEASE_VERSION=$(echo ${GITHUB_REF:10}-${GITHUB_SHA:0:7})
+        ARCHIVE_BASENAME=sari-web-${RELEASE_VERSION}
+        ARCHIVE_NAME=${ARCHIVE_BASENAME}.zip
+        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+        echo "ARCHIVE_BASENAME=$ARCHIVE_BASENAME" >> $GITHUB_ENV
+        echo "ARCHIVE_NAME=$ARCHIVE_NAME" >> $GITHUB_ENV
 
     - name: Set up Python 3.8
       uses: actions/setup-python@v2
@@ -48,8 +49,9 @@ jobs:
         find . -name \*.so -exec strip --verbose --strip-unneeded --preserve-dates {} \;
         zip -qr9 ../$ARCHIVE_NAME .
 
-    - name: Publish Release
-      run: aws s3 cp --region ${{ secrets.AWS_DEFAULT_REGION }} $ARCHIVE_NAME s3://${{ secrets.S3_DEPLOYMENT_BUCKET }}
+    - name: Release It
+      uses: softprops/action-gh-release@v1
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        files: ${{ env.ARCHIVE_NAME }}
